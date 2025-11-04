@@ -1,0 +1,124 @@
+﻿<Window x:Class="ChatMQTT.Client.WPF.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ChatMQTT.Client.WPF"
+        mc:Ignorable="d"
+        Title="MQTT Chat Client" Height="600" Width="900" WindowStartupLocation="CenterScreen">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Connection Panel -->
+        <Border Grid.Row="0" Background="#2C3E50" Padding="10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="Host:" Foreground="White" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <TextBox Grid.Column="1" x:Name="txtHost" Text="localhost" VerticalAlignment="Center" Margin="0,0,10,0" Padding="5"/>
+
+                <TextBlock Grid.Column="2" Text="Port:" Foreground="White" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <TextBox Grid.Column="3" x:Name="txtPort" Text="1883" VerticalAlignment="Center" Margin="0,0,10,0" Padding="5" Width="80"/>
+
+                <TextBlock Grid.Column="4" Text="Username:" Foreground="White" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <TextBox Grid.Column="5" x:Name="txtUsername" VerticalAlignment="Center" Margin="0,0,10,0" Padding="5"/>
+
+                <Button Grid.Column="6" x:Name="btnConnect" Content="Connect" Click="BtnConnect_Click"
+                        Background="#27AE60" Foreground="White" Padding="15,5" FontWeight="Bold" Cursor="Hand"/>
+            </Grid>
+        </Border>
+
+        <!-- Main Chat Area -->
+        <Grid Grid.Row="1" Margin="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="200"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Chat Messages -->
+            <Border Grid.Column="0" BorderBrush="#BDC3C7" BorderThickness="1" Margin="0,0,10,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0" Background="#ECF0F1" Padding="10" BorderBrush="#BDC3C7" BorderThickness="0,0,0,1">
+                        <TextBlock x:Name="txtCurrentTopic" Text="Topic: (Not connected)" FontWeight="Bold" FontSize="14"/>
+                    </Border>
+
+                    <ScrollViewer Grid.Row="1" x:Name="scrollViewer" VerticalScrollBarVisibility="Auto">
+                        <ItemsControl x:Name="lstMessages" Padding="10">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Margin="0,5" Padding="10" Background="#ECF0F1" CornerRadius="5">
+                                        <StackPanel>
+                                            <TextBlock FontWeight="Bold" Foreground="#2C3E50">
+                                                <Run Text="{Binding From}"/>
+                                                <Run Text=" - " Foreground="#7F8C8D"/>
+                                                <Run Text="{Binding Timestamp, StringFormat='{}{0:HH:mm:ss}'}" Foreground="#7F8C8D" FontSize="10"/>
+                                            </TextBlock>
+                                            <TextBlock Text="{Binding Message}" TextWrapping="Wrap" Margin="0,5,0,0"/>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+
+            <!-- Info Panel -->
+            <Border Grid.Column="1" BorderBrush="#BDC3C7" BorderThickness="1" Background="#F8F9FA">
+                <StackPanel Margin="10">
+                    <TextBlock Text="Connection Info" FontWeight="Bold" FontSize="14" Margin="0,0,0,10"/>
+
+                    <TextBlock Text="Status:" FontWeight="Bold" Margin="0,5,0,2"/>
+                    <TextBlock x:Name="txtStatus" Text="Disconnected" Foreground="Red"/>
+
+                    <TextBlock Text="Client ID:" FontWeight="Bold" Margin="0,10,0,2"/>
+                    <TextBlock x:Name="txtClientId" Text="-" TextWrapping="Wrap"/>
+
+                    <TextBlock Text="Messages:" FontWeight="Bold" Margin="0,10,0,2"/>
+                    <TextBlock x:Name="txtMessageCount" Text="0"/>
+
+                    <Separator Margin="0,15,0,15"/>
+
+                    <TextBlock Text="Topic Control" FontWeight="Bold" FontSize="14" Margin="0,0,0,10"/>
+                    <TextBox x:Name="txtTopic" Text="chat/general" Padding="5" Margin="0,0,0,5"/>
+                    <Button x:Name="btnChangeTopic" Content="Change Topic" Click="BtnChangeTopic_Click"
+                            Background="#3498DB" Foreground="White" Padding="5" Cursor="Hand"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- Message Input -->
+        <Border Grid.Row="2" Background="#ECF0F1" Padding="10" BorderBrush="#BDC3C7" BorderThickness="0,1,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBox Grid.Column="0" x:Name="txtMessage" Padding="10" FontSize="14"
+                         VerticalContentAlignment="Center" Margin="0,0,10,0"
+                         KeyDown="TxtMessage_KeyDown" IsEnabled="False"/>
+                <Button Grid.Column="1" x:Name="btnSend" Content="Send" Click="BtnSend_Click"
+                        Background="#27AE60" Foreground="White" Padding="20,10"
+                        FontWeight="Bold" FontSize="14" Cursor="Hand" IsEnabled="False"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

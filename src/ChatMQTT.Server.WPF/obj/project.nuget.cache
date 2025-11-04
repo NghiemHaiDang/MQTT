@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "raku/N1pkYQ=",
+  "success": true,
+  "projectFilePath": "C:\\DangNH30\\LGCNS\\DemoMQTT\\src\\ChatMQTT.Server.WPF\\ChatMQTT.Server.WPF.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\63200271\\.nuget\\packages\\mqttnet\\4.3.7.1207\\mqttnet.4.3.7.1207.nupkg.sha512"
+  ],
+  "logs": []
+}
