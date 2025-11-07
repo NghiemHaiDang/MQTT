@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ChatMQTT.Client.WPF")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+dd916027bcdce7d4c660feedeac6f0be1c87cc82")]
 [assembly: System.Reflection.AssemblyProductAttribute("ChatMQTT.Client.WPF")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ChatMQTT.Client.WPF")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

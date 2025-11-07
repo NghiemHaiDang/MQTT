@@ -1,9 +1,13 @@
-﻿<Application x:Class="ChatMQTT.Client.WPF.App"
+<Application x:Class="ChatMQTT.Client.WPF.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:ChatMQTT.Client.WPF"
-             StartupUri="MainWindow.xaml">
+             xmlns:converters="clr-namespace:ChatMQTT.Client.WPF.Converters"
+             StartupUri="Shell.xaml">
     <Application.Resources>
-         
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
+        <converters:InverseBoolConverter x:Key="InverseBoolConverter"/>
+        <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
+        <converters:FirstLetterConverter x:Key="FirstLetterConverter"/>
     </Application.Resources>
 </Application>

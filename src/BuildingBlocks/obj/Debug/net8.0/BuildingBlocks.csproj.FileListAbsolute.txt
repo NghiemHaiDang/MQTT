@@ -40,6 +40,7 @@ C:\DangNH30\LGCNS\DemoMQTT\src\BuildingBlocks\obj\Debug\net8.0\BuildingBlocks.Ge
 C:\DangNH30\LGCNS\DemoMQTT\src\BuildingBlocks\obj\Debug\net8.0\BuildingBlocks.AssemblyInfoInputs.cache
 C:\DangNH30\LGCNS\DemoMQTT\src\BuildingBlocks\obj\Debug\net8.0\BuildingBlocks.AssemblyInfo.cs
 C:\DangNH30\LGCNS\DemoMQTT\src\BuildingBlocks\obj\Debug\net8.0\BuildingBlocks.csproj.CoreCompileInputs.cache
+C:\DangNH30\LGCNS\DemoMQTT\src\BuildingBlocks\obj\Debug\net8.0\BuildingBlocks.sourcelink.json
 C:\DangNH30\LGCNS\DemoMQTT\src\BuildingBlocks\obj\Debug\net8.0\BuildingBlocks.dll
 C:\DangNH30\LGCNS\DemoMQTT\src\BuildingBlocks\obj\Debug\net8.0\refint\BuildingBlocks.dll
 C:\DangNH30\LGCNS\DemoMQTT\src\BuildingBlocks\obj\Debug\net8.0\BuildingBlocks.pdb

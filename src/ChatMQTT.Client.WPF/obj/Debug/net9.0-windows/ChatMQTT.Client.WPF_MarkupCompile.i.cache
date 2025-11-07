@@ -10,11 +10,11 @@ none
 false
 TRACE;DEBUG;NET;NET9_0;NETCOREAPP;WINDOWS;WINDOWS7_0;NET5_0_OR_GREATER;NET6_0_OR_GREATER;NET7_0_OR_GREATER;NET8_0_OR_GREATER;NET9_0_OR_GREATER;NETCOREAPP3_0_OR_GREATER;NETCOREAPP3_1_OR_GREATER;WINDOWS7_0_OR_GREATER
 C:\DangNH30\LGCNS\DemoMQTT\src\ChatMQTT.Client.WPF\App.xaml
-11407045341
+9-387153016
 
-6-835643627
-202-1317055051
-MainWindow.xaml;
+35-960686184
+203314619350
+LoginWindow.xaml;MainWindow.xaml;Shell.xaml;Styles\ButtonStyles.xaml;Styles\Colors.xaml;Styles\TextBoxStyles.xaml;Views\ChatView.xaml;Views\LoginView.xaml;Views\TopicSelectionView.xaml;
 
 True
 

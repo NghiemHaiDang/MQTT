@@ -1,0 +1,176 @@
+<UserControl x:Class="ChatMQTT.Client.WPF.Views.LoginView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="#F5F5F5">
+
+    <Border Width="500" Height="600" Background="White" CornerRadius="12"
+            Padding="40" Margin="20"
+            VerticalAlignment="Center" HorizontalAlignment="Center">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="20" ShadowDepth="0" Opacity="0.2"/>
+        </Border.Effect>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <StackPanel Grid.Row="0" Margin="0,0,0,30">
+                <TextBlock Text="MQTT Chat Client"
+                           FontSize="28" FontWeight="Bold"
+                           Foreground="#2196F3"
+                           HorizontalAlignment="Center"/>
+                <TextBlock Text="Connect and communicate securely"
+                           FontSize="14" Foreground="Gray"
+                           HorizontalAlignment="Center"
+                           Margin="0,8,0,0"/>
+            </StackPanel>
+
+            <!-- Tab Buttons -->
+            <Border Grid.Row="1" Background="#F5F5F5" CornerRadius="8"
+                    Padding="4" Margin="0,0,0,30">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Button Grid.Column="0" Content="Login"
+                            Command="{Binding ShowLoginCommand}"
+                            Padding="0,12" FontSize="14" FontWeight="SemiBold"
+                            BorderThickness="0" Cursor="Hand" Margin="0,0,2,0">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="Foreground" Value="Gray"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsLoginView}" Value="True">
+                                        <Setter Property="Background" Value="White"/>
+                                        <Setter Property="Foreground" Value="#2196F3"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                    <Button Grid.Column="1" Content="Register"
+                            Command="{Binding ShowRegisterCommand}"
+                            Padding="0,12" FontSize="14" FontWeight="SemiBold"
+                            BorderThickness="0" Cursor="Hand" Margin="2,0,0,0">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="Foreground" Value="Gray"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsLoginView}" Value="False">
+                                        <Setter Property="Background" Value="White"/>
+                                        <Setter Property="Foreground" Value="#2196F3"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </Grid>
+            </Border>
+
+            <!-- Content Area -->
+            <Grid Grid.Row="2">
+                <!-- Login Panel -->
+                <StackPanel Visibility="{Binding IsLoginView, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <!-- Email/Username -->
+                    <TextBlock Text="Email or Username" FontWeight="SemiBold"
+                               Foreground="#333" FontSize="13" Margin="0,0,0,8"/>
+                    <TextBox Text="{Binding LoginEmail, UpdateSourceTrigger=PropertyChanged}"
+                             Height="44" Padding="12,10" FontSize="14"
+                             VerticalContentAlignment="Center" Margin="0,0,0,20"/>
+
+                    <!-- Password -->
+                    <TextBlock Text="Password" FontWeight="SemiBold"
+                               Foreground="#333" FontSize="13" Margin="0,0,0,8"/>
+                    <PasswordBox x:Name="txtLoginPassword"
+                                 Height="44" Padding="12,10" FontSize="14"
+                                 VerticalContentAlignment="Center" Margin="0,0,0,12"
+                                 PasswordChanged="TxtLoginPassword_PasswordChanged"/>
+
+                    <!-- Error Message - Fixed Height -->
+                    <Border Height="50" Margin="0,0,0,20">
+                        <Border Background="#FFEBEE" BorderBrush="#F44336" BorderThickness="1"
+                                CornerRadius="6" Padding="12"
+                                Visibility="{Binding LoginError, Converter={StaticResource StringToVisibilityConverter}}">
+                            <TextBlock Text="{Binding LoginError}" Foreground="#F44336"
+                                       FontSize="12" TextWrapping="Wrap"/>
+                        </Border>
+                    </Border>
+
+                    <!-- Login Button -->
+                    <Button Content="Sign In" Command="{Binding LoginCommand}"
+                            Height="44" FontSize="15" FontWeight="SemiBold"
+                            Background="#4CAF50" Foreground="White"
+                            BorderThickness="0" Cursor="Hand" Margin="0,0,0,20"/>
+
+                    <!-- Loading -->
+                    <TextBlock Text="⟳ Authenticating..." FontStyle="Italic"
+                               Foreground="Gray" FontSize="13" HorizontalAlignment="Center"
+                               Visibility="{Binding IsLoginLoading, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                </StackPanel>
+
+                <!-- Register Panel -->
+                <StackPanel Visibility="{Binding IsLoginView, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+                    <!-- Username -->
+                    <TextBlock Text="Username" FontWeight="SemiBold"
+                               Foreground="#333" FontSize="13" Margin="0,0,0,8"/>
+                    <TextBox Text="{Binding RegisterUsername, UpdateSourceTrigger=PropertyChanged}"
+                             Height="44" Padding="12,10" FontSize="14"
+                             VerticalContentAlignment="Center" Margin="0,0,0,16"/>
+
+                    <!-- Email -->
+                    <TextBlock Text="Email Address" FontWeight="SemiBold"
+                               Foreground="#333" FontSize="13" Margin="0,0,0,8"/>
+                    <TextBox Text="{Binding RegisterEmail, UpdateSourceTrigger=PropertyChanged}"
+                             Height="44" Padding="12,10" FontSize="14"
+                             VerticalContentAlignment="Center" Margin="0,0,0,16"/>
+
+                    <!-- Password -->
+                    <TextBlock Text="Password" FontWeight="SemiBold"
+                               Foreground="#333" FontSize="13" Margin="0,0,0,8"/>
+                    <PasswordBox x:Name="txtRegisterPassword"
+                                 Height="44" Padding="12,10" FontSize="14"
+                                 VerticalContentAlignment="Center" Margin="0,0,0,16"
+                                 PasswordChanged="TxtRegisterPassword_PasswordChanged"/>
+
+                    <!-- Confirm Password -->
+                    <TextBlock Text="Confirm Password" FontWeight="SemiBold"
+                               Foreground="#333" FontSize="13" Margin="0,0,0,8"/>
+                    <PasswordBox x:Name="txtRegisterConfirmPassword"
+                                 Height="44" Padding="12,10" FontSize="14"
+                                 VerticalContentAlignment="Center" Margin="0,0,0,12"
+                                 PasswordChanged="TxtRegisterConfirmPassword_PasswordChanged"/>
+
+                    <!-- Error Message - Fixed Height -->
+                    <Border Height="50" Margin="0,0,0,20">
+                        <Border Background="#FFEBEE" BorderBrush="#F44336" BorderThickness="1"
+                                CornerRadius="6" Padding="12"
+                                Visibility="{Binding RegisterError, Converter={StaticResource StringToVisibilityConverter}}">
+                            <TextBlock Text="{Binding RegisterError}" Foreground="#F44336"
+                                       FontSize="12" TextWrapping="Wrap"/>
+                        </Border>
+                    </Border>
+
+                    <!-- Register Button -->
+                    <Button Content="Create Account" Command="{Binding RegisterCommand}"
+                            Height="44" FontSize="15" FontWeight="SemiBold"
+                            Background="#2196F3" Foreground="White"
+                            BorderThickness="0" Cursor="Hand" Margin="0,0,0,20"/>
+
+                    <!-- Loading -->
+                    <TextBlock Text="⟳ Creating account..." FontStyle="Italic"
+                               Foreground="Gray" FontSize="13" HorizontalAlignment="Center"
+                               Visibility="{Binding IsRegisterLoading, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Border>
+</UserControl>

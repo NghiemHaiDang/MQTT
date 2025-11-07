@@ -1,9 +1,9 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Text;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Input;
-using BuildingBlocks.Models.Clients;
+using ChatMQTT.Client.WPF.Models;
 using MQTTnet;
 using MQTTnet.Client;
 
@@ -17,14 +17,18 @@ public partial class MainWindow : Window
     private string _clientId = "";
     private ObservableCollection<ChatMessage> _messages;
 
-    public MainWindow()
+    public MainWindow(string username)
     {
         InitializeComponent();
+
+        _username = username;
         _messages = new ObservableCollection<ChatMessage>();
         lstMessages.ItemsSource = _messages;
 
         _mqttClient = new MqttFactory().CreateMqttClient();
         _mqttClient.ApplicationMessageReceivedAsync += OnMessageReceived;
+
+        txtUserInfo.Text = $"Logged in as: {_username}";
     }
 
     private async void BtnConnect_Click(object sender, RoutedEventArgs e)
@@ -35,13 +39,6 @@ public partial class MainWindow : Window
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(txtUsername.Text))
-        {
-            MessageBox.Show("Please enter a username!", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
-            return;
-        }
-
-        _username = txtUsername.Text.Trim();
         _clientId = $"{_username}_{Guid.NewGuid().ToString()[..8]}";
 
         try
@@ -96,6 +93,8 @@ public partial class MainWindow : Window
         {
             txtStatus.Text = "Connected";
             txtStatus.Foreground = System.Windows.Media.Brushes.Green;
+            txtConnectionStatus.Text = $"Connected to {txtHost.Text}:{txtPort.Text}";
+            statusIndicator.Background = System.Windows.Media.Brushes.Green;
             txtClientId.Text = _clientId;
             txtCurrentTopic.Text = $"Topic: {_currentTopic}";
             btnConnect.Content = "Disconnect";
@@ -104,22 +103,21 @@ public partial class MainWindow : Window
             btnSend.IsEnabled = true;
             txtHost.IsEnabled = false;
             txtPort.IsEnabled = false;
-            txtUsername.IsEnabled = false;
         }
         else
         {
             txtStatus.Text = "Disconnected";
             txtStatus.Foreground = System.Windows.Media.Brushes.Red;
+            txtConnectionStatus.Text = "Disconnected";
+            statusIndicator.Background = System.Windows.Media.Brushes.Red;
             txtClientId.Text = "-";
             txtCurrentTopic.Text = "Topic: (Not connected)";
             btnConnect.Content = "Connect";
-            btnConnect.Background = new System.Windows.Media.SolidColorBrush(
-                (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#27AE60"));
+            btnConnect.Background = System.Windows.Media.Brushes.Green;
             txtMessage.IsEnabled = false;
             btnSend.IsEnabled = false;
             txtHost.IsEnabled = true;
             txtPort.IsEnabled = true;
-            txtUsername.IsEnabled = true;
         }
     }
 
@@ -178,7 +176,7 @@ public partial class MainWindow : Window
                 if (chatMessage != null)
                 {
                     _messages.Add(chatMessage);
-                    txtMessageCount.Text = _messages.Count.ToString();
+                    txtMessageCount.Text = $"{_messages.Count} messages";
 
                     scrollViewer.ScrollToBottom();
                 }
@@ -220,7 +218,7 @@ public partial class MainWindow : Window
             _currentTopic = newTopic;
             txtCurrentTopic.Text = $"Topic: {_currentTopic}";
             _messages.Clear();
-            txtMessageCount.Text = "0";
+            txtMessageCount.Text = "0 messages";
 
             MessageBox.Show($"Switched to topic: {newTopic}", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
         }
