@@ -42,6 +42,7 @@ C:\DangNH30\LGCNS\DemoMQTT\src\ChatMQTT.Server.WPF\obj\Debug\net9.0-windows\Chat
 C:\DangNH30\LGCNS\DemoMQTT\src\ChatMQTT.Server.WPF\obj\Debug\net9.0-windows\ChatMQTT.Server.WPF.AssemblyInfoInputs.cache
 C:\DangNH30\LGCNS\DemoMQTT\src\ChatMQTT.Server.WPF\obj\Debug\net9.0-windows\ChatMQTT.Server.WPF.AssemblyInfo.cs
 C:\DangNH30\LGCNS\DemoMQTT\src\ChatMQTT.Server.WPF\obj\Debug\net9.0-windows\ChatMQTT.Server.WPF.csproj.CoreCompileInputs.cache
+C:\DangNH30\LGCNS\DemoMQTT\src\ChatMQTT.Server.WPF\obj\Debug\net9.0-windows\ChatMQTT.Server.WPF.sourcelink.json
 C:\DangNH30\LGCNS\DemoMQTT\src\ChatMQTT.Server.WPF\obj\Debug\net9.0-windows\ChatMQTT.1A261099.Up2Date
 C:\DangNH30\LGCNS\DemoMQTT\src\ChatMQTT.Server.WPF\obj\Debug\net9.0-windows\ChatMQTT.Server.WPF.dll
 C:\DangNH30\LGCNS\DemoMQTT\src\ChatMQTT.Server.WPF\obj\Debug\net9.0-windows\refint\ChatMQTT.Server.WPF.dll

@@ -77,7 +77,6 @@ public class TopicService
 
             if (response?.Success == true && response.Data?.Count > 0)
             {
-                // Flatten the nested list structure
                 return response.Data.SelectMany(list => list).ToList();
             }
 
@@ -98,7 +97,6 @@ public class TopicService
 
             var httpResponse = await _httpClient.PostAsJsonAsync($"{_baseUrl}/create", request);
 
-            // Nếu 401, thử refresh token và gọi lại
             if (httpResponse.StatusCode == HttpStatusCode.Unauthorized)
             {
                 var refreshed = await RefreshTokenIfNeededAsync();
@@ -127,7 +125,6 @@ public class TopicService
 
             var httpResponse = await _httpClient.GetAsync($"{_baseUrl}/{topicId}");
 
-            // Nếu 401, thử refresh token và gọi lại
             if (httpResponse.StatusCode == HttpStatusCode.Unauthorized)
             {
                 var refreshed = await RefreshTokenIfNeededAsync();

@@ -15,6 +15,8 @@ public class LoginViewModel : BaseViewModel
     private string _registerEmail = "";
     private string _registerPassword = "";
     private string _registerConfirmPassword = "";
+    private string _registerFullName = "";
+    private string _registerPhoneNumber = "";
     private string _loginError = "";
     private string _registerError = "";
     private bool _isLoginLoading;
@@ -55,6 +57,18 @@ public class LoginViewModel : BaseViewModel
     {
         get => _registerConfirmPassword;
         set => SetProperty(ref _registerConfirmPassword, value);
+    }
+
+    public string RegisterFullName
+    {
+        get => _registerFullName;
+        set => SetProperty(ref _registerFullName, value);
+    }
+
+    public string RegisterPhoneNumber
+    {
+        get => _registerPhoneNumber;
+        set => SetProperty(ref _registerPhoneNumber, value);
     }
 
     public string LoginError
@@ -163,6 +177,18 @@ public class LoginViewModel : BaseViewModel
             return;
         }
 
+        if (string.IsNullOrWhiteSpace(RegisterFullName))
+        {
+            RegisterError = "Please enter your full name";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(RegisterPhoneNumber))
+        {
+            RegisterError = "Please enter your phone number";
+            return;
+        }
+
         if (string.IsNullOrWhiteSpace(RegisterPassword))
         {
             RegisterError = "Please enter a password";
@@ -194,19 +220,33 @@ public class LoginViewModel : BaseViewModel
             var result = await _authService.RegisterAsync(
                 RegisterUsername.Trim(),
                 RegisterEmail.Trim(),
-                RegisterPassword);
+                RegisterPassword,
+                RegisterFullName.Trim(),
+                RegisterPhoneNumber.Trim());
 
             if (result != null && result.Success)
             {
-                MessageBox.Show(
-                    "Registration successful!\n\nYou can now login with your credentials.",
-                    "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-                IsLoginView = true;
-                LoginEmail = RegisterEmail;
+                if (result.LoginData != null)
+                {
+                    TokenService.AccessToken = result.LoginData.AccessToken;
+                    TokenService.RefreshToken = result.LoginData.RefreshToken;
+                    TokenService.AccessTokenExpires = result.LoginData.AccessTokenExpires;
+                    _mainViewModel.NavigateToTopicSelection(result.LoginData.UserName, result.LoginData.UserId);
+                }
+                else
+                {
+                    MessageBox.Show(
+                        "Registration successful!\n\nYou can now login with your credentials.",
+                        "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                    IsLoginView = true;
+                    LoginEmail = RegisterEmail;
+                }
                 RegisterUsername = "";
                 RegisterEmail = "";
                 RegisterPassword = "";
                 RegisterConfirmPassword = "";
+                RegisterFullName = "";
+                RegisterPhoneNumber = "";
             }
             else
             {

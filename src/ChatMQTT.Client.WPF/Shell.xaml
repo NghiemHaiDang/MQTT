@@ -4,7 +4,7 @@
         xmlns:vm="clr-namespace:ChatMQTT.Client.WPF.ViewModels"
         xmlns:views="clr-namespace:ChatMQTT.Client.WPF.Views"
         xmlns:local="clr-namespace:ChatMQTT.Client.WPF"
-        Title="MQTT Chat Client" Height="750" Width="1100"
+        Title="VNB Messenger" Height="800" Width="1200"
         WindowStartupLocation="CenterScreen">
 
     <Window.Resources>

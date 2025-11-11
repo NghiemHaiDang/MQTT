@@ -91,6 +91,43 @@ public class TopicSubscriptionService
         }
     }
 
+    public async Task<TopicSubscription?> SubscribeUserAsync(string topicId, string deviceId)
+    {
+        try
+        {
+            SetAuthorizationHeader();
+
+            var request = new SubscribeTopicRequest
+            {
+                SubscriptionId = Guid.NewGuid().ToString(),
+                DeviceId = deviceId,
+                TopicId = topicId
+            };
+
+            var httpResponse = await _httpClient.PostAsJsonAsync($"{_baseUrl}/subscribe", request);
+
+            if (httpResponse.StatusCode == HttpStatusCode.Unauthorized)
+            {
+                var refreshed = await RefreshTokenIfNeededAsync();
+                if (refreshed)
+                {
+                    httpResponse = await _httpClient.PostAsJsonAsync($"{_baseUrl}/subscribe", request);
+                }
+            }
+
+            httpResponse.EnsureSuccessStatusCode();
+
+            var response = await httpResponse.Content.ReadFromJsonAsync<SubscribeTopicResponse>();
+
+            return response?.Success == true ? response.Data : null;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error subscribing user to topic: {ex.Message}");
+            return null;
+        }
+    }
+
     public async Task<bool> UnsubscribeAsync(string subscriptionId)
     {
         try

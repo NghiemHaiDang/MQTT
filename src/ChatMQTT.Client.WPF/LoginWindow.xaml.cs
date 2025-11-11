@@ -217,7 +217,9 @@ public partial class LoginWindow : Window
             var result = await _authService.RegisterAsync(
                 txtRegisterUsername.Text.Trim(),
                 txtRegisterEmail.Text.Trim(),
-                txtRegisterPassword.Password);
+                txtRegisterPassword.Password,
+                "",
+                "");
 
             if (result != null && result.Success)
             {

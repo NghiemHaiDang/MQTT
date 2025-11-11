@@ -1,12 +1,13 @@
+﻿using ChatMQTT.Client.WPF.Models;
+using ChatMQTT.Client.WPF.Services;
+using MQTTnet;
+using MQTTnet.Client;
+using MQTTnet.Server;
 using System.Collections.ObjectModel;
 using System.Text;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Input;
-using ChatMQTT.Client.WPF.Models;
-using ChatMQTT.Client.WPF.Services;
-using MQTTnet;
-using MQTTnet.Client;
 
 namespace ChatMQTT.Client.WPF.ViewModels;
 
@@ -18,6 +19,7 @@ public class ChatViewModel : BaseViewModel
     private readonly TopicSubscriptionService _subscriptionService;
     private readonly ChatService _chatService;
     private readonly MessageService _messageService;
+    private readonly TopicService _topicService;
     private string _username;
     private string _userId;
     private string _currentTopic = "chat/general";
@@ -98,6 +100,7 @@ public class ChatViewModel : BaseViewModel
     public ICommand BackCommand { get; }
     public ICommand UnsubscribeCommand { get; }
     public ICommand LoadMoreHistoryCommand { get; }
+    public ICommand CreatePrivateChatCommand { get; }
 
     private readonly MainViewModel _mainViewModel;
 
@@ -114,6 +117,7 @@ public class ChatViewModel : BaseViewModel
         _subscriptionService = new TopicSubscriptionService();
         _chatService = new ChatService();
         _messageService = new MessageService();
+        _topicService = new TopicService();
         Messages = new ObservableCollection<ChatMessage>();
         ChatUsers = new ObservableCollection<ChatUser>();
 
@@ -128,27 +132,34 @@ public class ChatViewModel : BaseViewModel
         BackCommand = new RelayCommand(async _ => await BackToTopicsAsync());
         UnsubscribeCommand = new RelayCommand(async _ => await UnsubscribeAsync(), _ => TopicSubscriptionService.CurrentSubscription != null);
         LoadMoreHistoryCommand = new RelayCommand(async _ => await LoadChatHistoryAsync());
+        CreatePrivateChatCommand = new RelayCommand(async user => await CreatePrivateChatAsync(user as ChatUser));
 
-        // Load chat users và history
         _ = LoadChatUsersAsync();
         _ = LoadChatHistoryAsync();
+        _ = ConnectAsync();
     }
 
     private async Task LoadChatUsersAsync()
     {
         try
         {
+            Console.WriteLine($"[LoadChatUsers] Loading users for UserId={_userId}, TopicId={_currentTopicId}");
             var users = await _chatService.GetChatUsersAsync(_userId, _currentTopicId);
+
+            Console.WriteLine($"[LoadChatUsers] Received {users.Count} users from API");
 
             ChatUsers.Clear();
             foreach (var user in users)
             {
+                Console.WriteLine($"[LoadChatUsers] Adding user: {user.Username} (UserId={user.UserId})");
                 ChatUsers.Add(user);
             }
+
+            Console.WriteLine($"[LoadChatUsers] Total users in ChatUsers collection: {ChatUsers.Count}");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error loading chat users: {ex.Message}");
+            Console.WriteLine($"[LoadChatUsers] ERROR: {ex.Message}");
         }
     }
 
@@ -277,31 +288,80 @@ public class ChatViewModel : BaseViewModel
     {
         try
         {
-            ClientId = $"{Username}_{Guid.NewGuid().ToString()[..8]}";
+            var deviceId = string.IsNullOrWhiteSpace(ConfigService.GetDeviceId())
+                    ? $"Device_{Guid.NewGuid():N}"
+                    : ConfigService.GetDeviceId();
+
+            ClientId = deviceId;
 
             var options = new MqttClientOptionsBuilder()
-                .WithTcpServer(_mqttSettings.Host, _mqttSettings.Port)
                 .WithClientId(ClientId)
+                .WithTcpServer(_mqttSettings.Host, _mqttSettings.Port)
+                .WithCleanSession()
+                .WithKeepAlivePeriod(TimeSpan.FromSeconds(30))
                 .Build();
+            _mqttClient.DisconnectedAsync -= OnMqttClientDisconnected;
+            _mqttClient.DisconnectedAsync += OnMqttClientDisconnected;
 
             await _mqttClient.ConnectAsync(options);
-
-            var subscribeOptions = new MqttClientSubscribeOptionsBuilder()
-                .WithTopicFilter(f => f.WithTopic(CurrentTopic))
-                .Build();
-
-            await _mqttClient.SubscribeAsync(subscribeOptions);
+            Console.WriteLine($"[MQTT] Connected to {_mqttSettings.Host}:{_mqttSettings.Port}");
+            if (!string.IsNullOrWhiteSpace(_currentTopicId))
+            {
+                Console.WriteLine($"[MQTT] Subscribing to TopicId={_currentTopicId}");
+                await _mqttClient.SubscribeAsync(_currentTopicId);
+                Console.WriteLine($"[MQTT] Successfully subscribed to topic: {_currentTopicId}");
+            }
+            else
+            {
+                Console.WriteLine("[MQTT] Warning: No topic specified for subscription");
+            }
 
             IsConnected = true;
-            ConnectionStatus = $"Connected to {_mqttSettings.Host}:{_mqttSettings.Port}";
+            ConnectionStatus = $"Connected to {_mqttSettings.Host}:{_mqttSettings.Port} (ClientId={ClientId})";
             Messages.Clear();
             MessageCount = 0;
-
-            MessageBox.Show("Connected successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (Exception ex)
         {
+            IsConnected = false;
+            ConnectionStatus = "Connection failed";
+            Console.WriteLine($"[MQTT] Connection error: {ex.Message}");
             MessageBox.Show($"Connection failed: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    private async Task OnMqttClientDisconnected(MqttClientDisconnectedEventArgs e)
+    {
+        Console.WriteLine($"[MQTT] Disconnected: {e.Reason}");
+        IsConnected = false;
+        ConnectionStatus = "Disconnected - retrying...";
+
+        await Task.Delay(TimeSpan.FromSeconds(5));
+
+        try
+        {
+            var options = new MqttClientOptionsBuilder()
+                .WithClientId(ClientId)
+                .WithTcpServer(_mqttSettings.Host, _mqttSettings.Port)
+                .WithCleanSession()
+                .WithKeepAlivePeriod(TimeSpan.FromSeconds(30))
+                .Build();
+
+            await _mqttClient.ConnectAsync(options);
+            if (!string.IsNullOrWhiteSpace(_currentTopicId))
+            {
+                await _mqttClient.SubscribeAsync(_currentTopicId);
+                Console.WriteLine($"[MQTT] Reconnected and subscribed to TopicId={_currentTopicId}");
+            }
+
+            IsConnected = true;
+            ConnectionStatus = "Reconnected";
+        }
+        catch (Exception ex)
+        {
+            IsConnected = false;
+            ConnectionStatus = "Reconnect failed";
+            Console.WriteLine($"[MQTT] Reconnect failed: {ex.Message}");
         }
     }
 
@@ -335,16 +395,6 @@ public class ChatViewModel : BaseViewModel
 
         try
         {
-            var request = new SendDirectMessageRequest
-            {
-                TopicId = _currentTopicId,
-                SenderId = _userId,
-                Type = "text",
-                Title = _currentTopic,
-                Body = messageText,
-                ImageUrl = string.Empty,
-                TargetDeviceId = null
-            };
             Application.Current.Dispatcher.Invoke(() =>
             {
                 var chatMessage = new ChatMessage
@@ -359,13 +409,49 @@ public class ChatViewModel : BaseViewModel
                 Messages.Add(chatMessage);
                 MessageCount = Messages.Count;
             });
+
             Message = "";
 
-            var response = await _messageService.SendDirectMessageAsync(request);
+            var request = new SendDirectMessageRequest
+            {
+                TopicId = _currentTopicId,
+                SenderId = _userId,
+                Type = "text",
+                Title = _currentTopic,
+                Body = messageText,
+                ImageUrl = string.Empty,
+                TargetDeviceId = null
+            };
 
+            var response = await _messageService.SendDirectMessageAsync(request);
             if (response == null)
             {
-                MessageBox.Show("Failed to send message", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Failed to send message to API", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
+            if (_mqttClient != null && _mqttClient.IsConnected)
+            {
+                var mqttPayload = JsonSerializer.Serialize(new ChatMessage
+                {
+                    From = Username,
+                    Message = messageText,
+                    Timestamp = DateTime.Now,
+                    Topic = _currentTopic,
+                    IsOwnMessage = false
+                });
+
+                var mqttMsg = new MqttApplicationMessageBuilder()
+                    .WithTopic(_currentTopicId)
+                    .WithPayload(mqttPayload)
+                    .WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce)
+                    .Build();
+
+                await _mqttClient.PublishAsync(mqttMsg);
+                Console.WriteLine($"[MQTT] Published message to TopicId={_currentTopicId}: {mqttPayload}");
+            }
+            else
+            {
+                Console.WriteLine("[MQTT] Client not connected, skipping publish.");
             }
         }
         catch (Exception ex)
@@ -373,6 +459,7 @@ public class ChatViewModel : BaseViewModel
             MessageBox.Show($"Failed to send message: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
+
 
     private async Task ChangeTopicAsync()
     {
@@ -437,6 +524,83 @@ public class ChatViewModel : BaseViewModel
         }
 
         return Task.CompletedTask;
+    }
+
+    private async Task CreatePrivateChatAsync(ChatUser? selectedUser)
+    {
+        if (selectedUser == null)
+            return;
+        if (selectedUser.UserId == _userId)
+        {
+            MessageBox.Show("You cannot create a private chat with yourself.", "Info",
+                MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        try
+        {
+            var topicName = $"{Username}/{selectedUser.Username}";
+            var createTopicRequest = new CreateTopicRequest
+            {
+                TopicId = Guid.NewGuid().ToString(),
+                Name = topicName,
+                Description = $"Private chat between {Username} and {selectedUser.Username}",
+                AppId = "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                Status = 0,
+                CreatedBy = _userId
+            };
+            var createResponse = await _topicService.CreateTopicAsync(createTopicRequest);
+
+            if (createResponse == null || !createResponse.Success || createResponse.Data == null)
+            {
+                MessageBox.Show("Failed to create private chat topic.", "Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            var newTopic = createResponse.Data;
+            Console.WriteLine($"[CreatePrivateChat] New topic created: TopicId={newTopic.TopicId}, Name={newTopic.Name}");
+
+            Console.WriteLine($"[CreatePrivateChat] Subscribing current user (UserId={_userId}) to topic {newTopic.TopicId}");
+            var currentUserSubscription = await _subscriptionService.SubscribeAsync(newTopic.TopicId);
+
+            if (currentUserSubscription == null)
+            {
+                Console.WriteLine($"[CreatePrivateChat] ERROR: Failed to subscribe current user");
+                MessageBox.Show("Failed to subscribe current user to the new topic.", "Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            Console.WriteLine($"[CreatePrivateChat] Current user subscribed: SubscriptionId={currentUserSubscription.SubscriptionId}");
+
+            TopicSubscriptionService.CurrentSubscription = currentUserSubscription;
+
+            Console.WriteLine($"[CreatePrivateChat] Subscribing selected user (UserId={selectedUser.UserId}) to topic {newTopic.TopicId}");
+            var selectedUserSubscription = await _subscriptionService.SubscribeUserAsync(newTopic.TopicId, selectedUser.UserId);
+
+            if (selectedUserSubscription == null)
+            {
+                Console.WriteLine($"[CreatePrivateChat] ERROR: Failed to subscribe selected user");
+                MessageBox.Show($"Warning: Failed to subscribe {selectedUser.Username} to the topic. They may need to subscribe manually.", "Warning",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+            else
+            {
+                Console.WriteLine($"[CreatePrivateChat] Selected user subscribed: SubscriptionId={selectedUserSubscription.SubscriptionId}");
+            }
+
+            MessageBox.Show($"Private chat created successfully with {selectedUser.Username}!", "Success",
+                MessageBoxButton.OK, MessageBoxImage.Information);
+            await Task.Delay(500);
+            await Cleanup();
+            _mainViewModel.NavigateToChat(Username, _userId, newTopic.Name, newTopic.TopicId);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error creating private chat: {ex.Message}", "Error",
+                MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 
     public async Task Cleanup()

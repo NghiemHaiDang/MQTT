@@ -14,11 +14,11 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <Border Grid.Row="0" Background="#0084FF">
+        <Border Grid.Row="0" Background="#A50034">
             <Border.Effect>
-                <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.3" Color="#000000"/>
+                <DropShadowEffect BlurRadius="8" ShadowDepth="1" Opacity="0.2" Color="#000000"/>
             </Border.Effect>
-            <Grid Margin="20,0">
+            <Grid Margin="30,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
@@ -38,14 +38,14 @@
                             </Border>
                         </ControlTemplate>
                     </Button.Template>
-                    <TextBlock Text="←" FontSize="24" Foreground="#0084FF" FontWeight="Bold"/>
+                    <TextBlock Text="←" FontSize="24" Foreground="#A50034" FontWeight="Bold"/>
                 </Button>
 
                 <!-- Topic Info with Avatar -->
                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                     <!-- Avatar Circle -->
-                    <Border Width="45" Height="45" CornerRadius="22.5" Background="#4CAF50" Margin="0,0,12,0">
-                        <TextBlock Text="#" FontSize="24" FontWeight="Bold" Foreground="White"
+                    <Border Width="45" Height="45" CornerRadius="22.5" Background="White" Margin="0,0,12,0">
+                        <TextBlock Text="#" FontSize="24" FontWeight="Bold" Foreground="#A50034"
                                    HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
 
@@ -137,7 +137,7 @@
             </Grid.ColumnDefinitions>
 
             <!-- Users List Panel -->
-            <Border Grid.Column="0" Background="#FFFFFF" BorderBrush="#E4E6EB" BorderThickness="0,0,1,0">
+            <Border Grid.Column="0" Background="#FAFAFA" BorderBrush="#E0E0E0" BorderThickness="0,0,1,0">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -145,8 +145,8 @@
                     </Grid.RowDefinitions>
 
                     <!-- Users Header -->
-                    <Border Grid.Row="0" Background="#F0F2F5" Padding="16,12" BorderBrush="#E4E6EB" BorderThickness="0,0,0,1">
-                        <TextBlock Text="Users in Topic" FontSize="14" FontWeight="SemiBold" Foreground="#050505"/>
+                    <Border Grid.Row="0" Background="#F5F5F5" Padding="16,12" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+                        <TextBlock Text="Users in Topic" FontSize="14" FontWeight="SemiBold" Foreground="#333333"/>
                     </Border>
 
                     <!-- Users List -->
@@ -154,7 +154,7 @@
                         <ItemsControl ItemsSource="{Binding ChatUsers}" Margin="8">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Border Background="Transparent" Padding="8,6" Margin="0,2" CornerRadius="8">
+                                    <Border Background="Transparent" Padding="8,6" Margin="0,2" CornerRadius="8" Cursor="Hand">
                                         <Border.Style>
                                             <Style TargetType="Border">
                                                 <Style.Triggers>
@@ -164,6 +164,12 @@
                                                 </Style.Triggers>
                                             </Style>
                                         </Border.Style>
+                                        <i:Interaction.Triggers>
+                                            <i:EventTrigger EventName="MouseLeftButtonUp">
+                                                <i:InvokeCommandAction Command="{Binding DataContext.CreatePrivateChatCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                       CommandParameter="{Binding}"/>
+                                            </i:EventTrigger>
+                                        </i:Interaction.Triggers>
                                         <Grid>
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="Auto"/>
@@ -173,7 +179,7 @@
 
                                             <!-- Avatar -->
                                             <Border Grid.Column="0" Width="32" Height="32" CornerRadius="16"
-                                                    Background="#0084FF" Margin="0,0,10,0">
+                                                    Background="#A50034" Margin="0,0,10,0">
                                                 <TextBlock Text="{Binding Initial}" FontSize="14" FontWeight="SemiBold"
                                                            Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                             </Border>
@@ -270,10 +276,10 @@
                                     <Border CornerRadius="18" Padding="12,8" MaxWidth="500">
                                         <Border.Style>
                                             <Style TargetType="Border">
-                                                <Setter Property="Background" Value="#E4E6EB"/>
+                                                <Setter Property="Background" Value="#F0F0F0"/>
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding IsOwnMessage}" Value="True">
-                                                        <Setter Property="Background" Value="#0084FF"/>
+                                                        <Setter Property="Background" Value="#A50034"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>

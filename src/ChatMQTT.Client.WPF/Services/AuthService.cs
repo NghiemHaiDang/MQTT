@@ -53,7 +53,7 @@ public class AuthService
         }
     }
 
-    public async Task<RegisterResult?> RegisterAsync(string username, string email, string password)
+    public async Task<RegisterResult?> RegisterAsync(string username, string email, string password, string fullName, string phoneNumber)
     {
         try
         {
@@ -61,10 +61,12 @@ public class AuthService
             {
                 UserName = username,
                 Email = email,
-                Password = password
+                Password = password,
+                FullName = fullName,
+                PhoneNumber = phoneNumber
             };
 
-            var response = await _httpClient.PostAsJsonAsync("/api/Auth/register", registerRequest);
+            var response = await _httpClient.PostAsJsonAsync("/api/User/register", registerRequest);
 
             if (response.IsSuccessStatusCode)
             {
@@ -75,7 +77,8 @@ public class AuthService
                     return new RegisterResult
                     {
                         Success = true,
-                        Message = result.Message
+                        Message = result.Message,
+                        LoginData = result.Data
                     };
                 }
                 else
@@ -164,9 +167,20 @@ public class LoginRequest
 
 public class RegisterRequest
 {
+    [JsonPropertyName("userName")]
     public string UserName { get; set; } = string.Empty;
+
+    [JsonPropertyName("email")]
     public string Email { get; set; } = string.Empty;
+
+    [JsonPropertyName("password")]
     public string Password { get; set; } = string.Empty;
+
+    [JsonPropertyName("fullName")]
+    public string FullName { get; set; } = string.Empty;
+
+    [JsonPropertyName("phoneNumber")]
+    public string PhoneNumber { get; set; } = string.Empty;
 }
 
 public class RegisterResponse
@@ -176,12 +190,16 @@ public class RegisterResponse
 
     [JsonPropertyName("message")]
     public string Message { get; set; } = string.Empty;
+
+    [JsonPropertyName("data")]
+    public LoginData? Data { get; set; }
 }
 
 public class RegisterResult
 {
     public bool Success { get; set; }
     public string Message { get; set; } = string.Empty;
+    public LoginData? LoginData { get; set; }
 }
 
 public class ApiResponse
